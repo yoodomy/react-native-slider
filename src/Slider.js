@@ -182,7 +182,6 @@ var Slider = React.createClass({
       containerSize: {width: 0, height: 0},
       trackSize: {width: 0, height: 0},
       thumbSize: {width: 0, height: 0},
-      graduationSize: {width: 0, height: 0},
       allMeasured: false,
       value: new Animated.Value(this.props.value),
     };
@@ -256,7 +255,7 @@ var Slider = React.createClass({
       debugTouchArea,
       ...other
     } = this.props;
-    var {value, containerSize, trackSize, thumbSize, graduationSize, allMeasured} = this.state;
+    var {value, containerSize, trackSize, thumbSize, allMeasured} = this.state;
     var mainStyles = styles || defaultStyles;
     var thumbLeft = value.interpolate({
         inputRange: [minimumValue, maximumValue],
@@ -291,7 +290,7 @@ var Slider = React.createClass({
             key={i}
             onLayout={this._measureGraduation}
             style={[
-              {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + graduationSize.height) / 2},
+              {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
               mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
             ]}
           />
@@ -336,7 +335,6 @@ var Slider = React.createClass({
     } = this.props;
     var {
       containerSize,
-      graduationSize,
       thumbSize,
     } = this.state;
 
@@ -392,10 +390,6 @@ var Slider = React.createClass({
     this._handleMeasure('thumbSize', x);
   },
 
-  _measureGraduation(x: Object) {
-    this._handleMeasure('graduationSize', x);
-  },
-
   _handleMeasure(name: string, x: Object) {
     var {width, height} = x.nativeEvent.layout;
     var size = {width: width, height: height};
@@ -412,7 +406,6 @@ var Slider = React.createClass({
         containerSize: this._containerSize,
         trackSize: this._trackSize,
         thumbSize: this._thumbSize,
-        graduationSize: this._graduationSize,
         allMeasured: true,
       })
     }
