@@ -166,6 +166,12 @@ var Slider = React.createClass({
     graduationStyle: View.propTypes.style,
 
     /**
+     * The style applied to the graduation legend.
+     *
+     */
+    graduationLegendStyle: View.propTypes.style,
+
+    /**
      * Set this to true to visually see the thumb touch rect in green.
      */
     debugTouchArea: PropTypes.bool,
@@ -255,7 +261,8 @@ var Slider = React.createClass({
     ) || !styleEqual(this.props.style, nextProps.style)
       || !styleEqual(this.props.trackStyle, nextProps.trackStyle)
       || !styleEqual(this.props.thumbStyle, nextProps.thumbStyle)
-      || !styleEqual(this.props.graduationStyle, nextProps.graduationStyle);
+      || !styleEqual(this.props.graduationStyle, nextProps.graduationStyle)
+      || !styleEqual(this.props.graduationLegendStyle, nextProps.graduationLegendStyle);
   },
   render() {
     var {
@@ -344,6 +351,7 @@ var Slider = React.createClass({
       trackStyle,
       thumbStyle,
       graduationStyle,
+      graduationLegendStyle,
       ...otherProps,
     } = props;
 
@@ -558,9 +566,10 @@ var Slider = React.createClass({
   },
 
   _renderGraduationLabel(index: Number) {
+    var mainStyles = this.props.styles || defaultStyles;
     if (this.props.graduationLabel) {
       return (
-        <Text style={{textAlign: 'center'}}>
+        <Text style={[mainStyles.graduationLegend, this.props.graduationLegendStyle]}>
           {this.props.graduationLabel(index)}
         </Text>
       )
@@ -613,6 +622,9 @@ var defaultStyles = StyleSheet.create({
     position: 'absolute',
     top: GRADUATION_LABEL_OFFSET,
     backgroundColor: 'transparent',
+  },
+  graduationLegend: {
+    textAlign: 'center',
   },
   touchArea: {
     position: 'absolute',
