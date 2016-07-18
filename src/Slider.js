@@ -9,6 +9,7 @@ import {
   Animated,
   StyleSheet,
   PanResponder,
+  Text,
   View,
   Easing
 } from "react-native";
@@ -20,6 +21,7 @@ var TRACK_SIZE = 4;
 var THUMB_SIZE = 20;
 var GRADUATION_HEIGHT = 10;
 var GRADUATION_WIDTH = 3;
+var GRADUATION_LABEL_OFFSET = -37;
 
 function Rect(x, y, width, height) {
   this.x = x;
@@ -110,6 +112,12 @@ var Slider = React.createClass({
     thumbTintColor: PropTypes.string,
 
     /**
+     * The function which given the graduation index returns the wanted label
+     * placed above.
+     */
+    graduationLabel: PropTypes.func,
+
+    /**
      * The size of the touch area that allows moving the thumb.
      * The touch area has the same center has the visible thumb.
      * This allows to have a visually small thumb while still allowing the user
@@ -178,10 +186,21 @@ var Slider = React.createClass({
     animationConfig : PropTypes.object,
   },
   getInitialState() {
+    const {
+      graduation,
+      maximumValue,
+      minimumValue,
+    } = this.props;
+
+    const numberOfGraduations = graduation ? (maximumValue-minimumValue) / graduation + 1 : 0;
+
+    // We provide an initial legend width big enough (150) to contain usual texts
+    // to be provided above the graduation marks
     return {
       containerSize: {width: 0, height: 0},
       trackSize: {width: 0, height: 0},
       thumbSize: {width: 0, height: 0},
+      legendWidth: Array.from(new Array(numberOfGraduations), () => 150),
       allMeasured: false,
       value: new Animated.Value(this.props.value),
     };
@@ -229,7 +248,6 @@ var Slider = React.createClass({
     // - when only the 'value' prop changes as it's already handled with the Animated.Value
     // - when the event handlers change (rendering doesn't depend on them)
     // - when the style props haven't actually change
-
     return shallowCompare(
       { props: this._getPropsForComponentUpdate(this.props), state: this.state },
       this._getPropsForComponentUpdate(nextProps),
@@ -286,14 +304,19 @@ var Slider = React.createClass({
           onLayout={this._measureTrack} />
         <Animated.View style={[mainStyles.track, trackStyle, minimumTrackStyle]} />
         {[...Array(numberOfGraduations)].map((x, i) =>
-          <Animated.View
-            key={i}
-            onLayout={this._measureGraduation}
-            style={[
-              {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
-              mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
-            ]}
-          />
+          <View key={i}>
+            <View
+              style={[
+                {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
+                mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
+            ]}/>
+            <Animated.View
+              onLayout={(event) => this._measureLegend(event, i)}
+              style={[mainStyles.graduationLabel,
+                {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
+              {this._renderGraduationLabel(i)}
+            </Animated.View>
+          </View>
         )}
         <Animated.View
           onLayout={this._measureThumb}
@@ -330,6 +353,7 @@ var Slider = React.createClass({
   _getGraduationOffset(index: number) {
     var {
       graduation,
+      thumbStyle,
       minimumValue,
       maximumValue,
     } = this.props;
@@ -340,7 +364,13 @@ var Slider = React.createClass({
 
     var graduationOffset = thumbSize.height / 2;
 
-    return graduationOffset += (minimumValue+graduation*index) * (containerSize.width-thumbSize.width) / maximumValue;
+    graduationOffset += (minimumValue+graduation*index) * (containerSize.width-thumbSize.width) / maximumValue;
+
+    if (thumbStyle.borderWidth) {
+      graduationOffset -= 2*thumbStyle.borderWidth;
+    }
+
+    return graduationOffset;
   },
 
   _handleStartShouldSetPanResponder: function(e: Object, /*gestureState: Object*/): boolean {
@@ -388,6 +418,12 @@ var Slider = React.createClass({
 
   _measureThumb(x: Object) {
     this._handleMeasure('thumbSize', x);
+  },
+
+  _measureLegend(x: Object, index: number) {
+    const legendWidth = this.state.legendWidth;
+    legendWidth[index] = x.nativeEvent.layout.width;
+    this.setState({legendWidth});
   },
 
   _handleMeasure(name: string, x: Object) {
@@ -521,6 +557,17 @@ var Slider = React.createClass({
     );
   },
 
+  _renderGraduationLabel(index: Number) {
+    if (this.props.graduationLabel) {
+      return (
+        <Text style={{textAlign: 'center'}}>
+          {this.props.graduationLabel(index)}
+        </Text>
+      )
+    }
+    return <View />;
+  },
+
   _renderDebugThumbTouchRect(thumbLeft) {
     var thumbTouchRect = this._getThumbTouchRect();
     var positionStyle = {
@@ -561,6 +608,11 @@ var defaultStyles = StyleSheet.create({
     position: 'absolute',
     height: GRADUATION_HEIGHT,
     width: GRADUATION_WIDTH,
+  },
+  graduationLabel: {
+    position: 'absolute',
+    top: GRADUATION_LABEL_OFFSET,
+    backgroundColor: 'transparent',
   },
   touchArea: {
     position: 'absolute',
