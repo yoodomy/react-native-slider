@@ -243,8 +243,7 @@ var Slider = React.createClass({
   },
   componentWillReceiveProps: function(nextProps) {
     var newValue = nextProps.value;
-
-    if (this.props.value !== newValue) {
+    if (this._getCurrentValue() !== newValue) {
       if (this.props.animateTransitions) {
         this._setCurrentValueAnimated(newValue);
       }
