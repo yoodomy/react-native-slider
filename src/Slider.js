@@ -7,6 +7,7 @@ import React, {
 
 import {
   Animated,
+  Dimensions,
   StyleSheet,
   PanResponder,
   Text,
@@ -70,6 +71,14 @@ var Slider = React.createClass({
      * Default value is false.
      */
     disabled: PropTypes.bool,
+
+    /**
+     * If true, touching the slider will directly move the thumb to the
+     * touched position
+     * WARNING : Only works if the slider is centered on the screen
+     * Default value is false
+     */
+    enableDirectTouch: PropTypes.bool,
 
     /**
      * Initial minimum value of the slider. Default value is 0.
@@ -225,6 +234,7 @@ var Slider = React.createClass({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
       onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
       onPanResponderGrant: this._handlePanResponderGrant,
+      onPanResponderStart: this._handlePanResponderStart,
       onPanResponderMove: this._handlePanResponderMove,
       onPanResponderRelease: this._handlePanResponderEnd,
       onPanResponderTerminationRequest: this._handlePanResponderRequestEnd,
@@ -375,7 +385,10 @@ var Slider = React.createClass({
 
   _handleStartShouldSetPanResponder: function(e: Object, /*gestureState: Object*/): boolean {
     // Should we become active when the user presses down on the thumb?
-    return this._thumbHitTest(e);
+    this.setState({
+      moving: this._thumbHitTest(e),
+    });
+    return true;
   },
 
   _handleMoveShouldSetPanResponder: function(/*e: Object, gestureState: Object*/): boolean {
@@ -383,16 +396,25 @@ var Slider = React.createClass({
     return false;
   },
 
-  _handlePanResponderGrant: function(/*e: Object, gestureState: Object*/) {
+  _handlePanResponderGrant: function(e: Object, gestureState: Object) {
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
     this._fireChangeEvent('onSlidingStart');
   },
-  _handlePanResponderMove: function(e: Object, gestureState: Object) {
-    if (this.props.disabled) {
+  _handlePanResponderStart: function(e: Object, gestureState: Object) {
+    if (this._thumbHitTest(e) || !this.props.enableDirectTouch) {
       return;
     }
 
-    this._setCurrentValue(this._getValue(gestureState));
+    this._setCurrentValue(this._getValue(gestureState, false));
+    this._fireChangeEvent('onValueChange');
+    this._fireChangeEvent('onSlidingComplete');
+  },
+  _handlePanResponderMove: function(e: Object, gestureState: Object) {
+    if (this.props.disabled || !this.state.moving) {
+      return;
+    }
+
+    this._setCurrentValue(this._getValue(gestureState, true));
     this._fireChangeEvent('onValueChange');
   },
   _handlePanResponderRequestEnd: function(e: Object, gestureState: Object) {
@@ -400,11 +422,13 @@ var Slider = React.createClass({
     return false;
   },
   _handlePanResponderEnd: function(e: Object, gestureState: Object) {
+    this.setState({
+      moving: false,
+    });
     if (this.props.disabled) {
       return;
     }
 
-    this._setCurrentValue(this._getValue(gestureState));
     this._fireChangeEvent('onSlidingComplete');
   },
 
@@ -456,9 +480,15 @@ var Slider = React.createClass({
     return ratio * (this.state.containerSize.width - this.state.thumbSize.width);
   },
 
-  _getValue(gestureState: Object) {
+  _getValue(gestureState: Object, move: boolean) {
     var length = this.state.containerSize.width - this.state.thumbSize.width;
-    var thumbLeft = this._previousLeft + gestureState.dx;
+    var thumbLeft;
+    if (move) {
+      thumbLeft = this._previousLeft + gestureState.dx;
+    } else {
+      var offset = (Dimensions.get('window').width - length) / 2;
+      thumbLeft = gestureState.x0 - offset;
+    }
 
     var ratio = thumbLeft / length;
 
