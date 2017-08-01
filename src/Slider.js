@@ -173,6 +173,8 @@ var Slider = React.createClass({
      * The style applied to the graduation.
      */
     graduationStyle: View.propTypes.style,
+    graduationLabelStyle: Text.propTypes.style,
+    graduationLabelContainerStyle: View.propTypes.style,
 
     /**
      * Set this to true to visually see the thumb touch rect in green.
@@ -264,7 +266,9 @@ var Slider = React.createClass({
     ) || !styleEqual(this.props.style, nextProps.style)
       || !styleEqual(this.props.trackStyle, nextProps.trackStyle)
       || !styleEqual(this.props.thumbStyle, nextProps.thumbStyle)
-      || !styleEqual(this.props.graduationStyle, nextProps.graduationStyle);
+      || !styleEqual(this.props.graduationStyle, nextProps.graduationStyle)
+      || !styleEqual(this.props.graduationLabelContainerStyle, nextProps.graduationLabelContainerStyle)
+      || !styleEqual(this.props.graduationLabelStyle, nextProps.graduationLabelStyle);
   },
   render() {
     var {
@@ -279,6 +283,7 @@ var Slider = React.createClass({
       trackStyle,
       thumbStyle,
       graduationStyle,
+      graduationLabelContainerStyle,
       debugTouchArea,
       ...other
     } = this.props;
@@ -321,7 +326,7 @@ var Slider = React.createClass({
             ]}/>
             <Animated.View
               onLayout={(event) => this._measureLegend(event, i)}
-              style={[mainStyles.graduationLabel,
+              style={[mainStyles.graduationLabel, graduationLabelContainerStyle,
                 {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
               {this._renderGraduationLabel(i)}
             </Animated.View>
@@ -589,7 +594,7 @@ var Slider = React.createClass({
   _renderGraduationLabel(index: Number) {
     if (this.props.graduationLabel) {
       return (
-        <Text style={{textAlign: 'center'}}>
+        <Text style={[{textAlign: 'center'}, this.props.graduationLabelStyle]}>
           {this.props.graduationLabel(index)}
         </Text>
       )
