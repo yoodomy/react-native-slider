@@ -16,7 +16,7 @@ import {
 } from "react-native";
 
 const shallowCompare = require('react-addons-shallow-compare'),
-      styleEqual = require('style-equal');
+  styleEqual = require('style-equal');
 
 var TRACK_SIZE = 4;
 var THUMB_SIZE = 20;
@@ -33,9 +33,9 @@ function Rect(x, y, width, height) {
 
 Rect.prototype.containsPoint = function(x, y) {
   return (x >= this.x
-          && y >= this.y
-          && x <= this.x + this.width
-          && y <= this.y + this.height);
+    && y >= this.y
+    && x <= this.x + this.width
+    && y <= this.y + this.height);
 };
 
 var DEFAULT_ANIMATION_CONFIGS = {
@@ -182,18 +182,18 @@ var Slider = React.createClass({
     debugTouchArea: PropTypes.bool,
 
     /**
-    * Set to true to animate values with default 'timing' animation type
-    */
+     * Set to true to animate values with default 'timing' animation type
+     */
     animateTransitions : PropTypes.bool,
 
     /**
-    * Custom Animation type. 'spring' or 'timing'.
-    */
+     * Custom Animation type. 'spring' or 'timing'.
+     */
     animationType : PropTypes.oneOf(['spring', 'timing']),
 
     /**
-    * Used to configure the animation parameters.  These are the same parameters in the Animated library.
-    */
+     * Used to configure the animation parameters.  These are the same parameters in the Animated library.
+     */
     animationConfig : PropTypes.object,
   },
   getInitialState() {
@@ -211,6 +211,7 @@ var Slider = React.createClass({
       containerSize: {width: 0, height: 0},
       trackSize: {width: 0, height: 0},
       thumbSize: {width: 0, height: 0},
+      currentValueBubbleSize: {width: 0, height: 0},
       legendWidth: Array.from(new Array(numberOfGraduations), () => 150),
       allMeasured: false,
       value: new Animated.Value(this.props.value),
@@ -263,7 +264,7 @@ var Slider = React.createClass({
       { props: this._getPropsForComponentUpdate(this.props), state: this.state },
       this._getPropsForComponentUpdate(nextProps),
       nextState
-    ) || !styleEqual(this.props.style, nextProps.style)
+      ) || !styleEqual(this.props.style, nextProps.style)
       || !styleEqual(this.props.trackStyle, nextProps.trackStyle)
       || !styleEqual(this.props.thumbStyle, nextProps.thumbStyle)
       || !styleEqual(this.props.graduationStyle, nextProps.graduationStyle)
@@ -282,18 +283,25 @@ var Slider = React.createClass({
       style,
       trackStyle,
       thumbStyle,
+      currentValueBubbleContainerStyle,
+      currentValueBubbleTextStyle,
       graduationStyle,
       graduationLabelContainerStyle,
       debugTouchArea,
       ...other
     } = this.props;
-    var {value, containerSize, trackSize, thumbSize, allMeasured} = this.state;
+    var {value, containerSize, trackSize, thumbSize, currentValueBubbleSize, allMeasured} = this.state;
     var mainStyles = styles || defaultStyles;
-    var thumbLeft = value.interpolate({
-        inputRange: [minimumValue, maximumValue],
-        outputRange: [0, containerSize.width - thumbSize.width],
-        //extrapolate: 'clamp',
-      });
+    var thumbLeft =  value.interpolate({
+      inputRange: [minimumValue, maximumValue],
+      outputRange: [0, containerSize.width - thumbSize.width],
+      //extrapolate: 'clamp',
+    });
+    const currentValueBubbleLeft = !!this.props.currentValueBubble && value.interpolate({
+      inputRange: [minimumValue, maximumValue],
+      outputRange: [-thumbSize.width / 2 + 4, containerSize.width - currentValueBubbleSize.width + thumbSize.width / 2 - 4],
+    });
+
     var valueVisibleStyle = {};
     if (!allMeasured) {
       valueVisibleStyle.opacity = 0;
@@ -323,7 +331,7 @@ var Slider = React.createClass({
               style={[
                 {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
                 mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
-            ]}/>
+              ]}/>
             <Animated.View
               onLayout={(event) => this._measureLegend(event, i)}
               style={[mainStyles.graduationLabel, graduationLabelContainerStyle,
@@ -339,6 +347,13 @@ var Slider = React.createClass({
             mainStyles.thumb, thumbStyle, {left: thumbLeft, ...valueVisibleStyle}
           ]}
         />
+        {!!this.props.currentValueBubble && !!this.props.graduationLabel &&
+        <Animated.View
+          onLayout={this._measureCurrentValueBubble}
+          style={[{top: -(thumbSize.height) / 2 + trackSize.height}, mainStyles.currentValueBubbleContainer, currentValueBubbleContainerStyle, { left: currentValueBubbleLeft, ...valueVisibleStyle }]}>
+          <Text style={[mainStyles.currentValueBubble, currentValueBubbleTextStyle]}>{this.props.graduationLabel(this._getCurrentValue())}</Text>
+        </Animated.View>
+        }
         <View
           style={[defaultStyles.touchArea, touchOverflowStyle]}
           {...this._panResponder.panHandlers}>
@@ -350,7 +365,6 @@ var Slider = React.createClass({
 
   _getPropsForComponentUpdate(props) {
     var {
-      value,
       onValueChange,
       onSlidingStart,
       onSlidingComplete,
@@ -361,12 +375,17 @@ var Slider = React.createClass({
       ...otherProps,
     } = props;
 
+    if (!this.props.currentValueBubble) {
+      otherProps.value = undefined;
+    }
+
     return otherProps;
   },
 
   _getGraduationOffset(index: number) {
     var {
       graduation,
+      graduationStyle,
       thumbStyle,
       minimumValue,
       maximumValue,
@@ -376,13 +395,16 @@ var Slider = React.createClass({
       thumbSize,
     } = this.state;
 
-    var graduationOffset = thumbSize.height / 2;
+    var graduationOffset = thumbSize.width / 2;
 
     graduationOffset += (minimumValue+graduation*index) * (containerSize.width-thumbSize.width) / maximumValue;
 
     if (thumbStyle.borderWidth) {
       graduationOffset -= 2*thumbStyle.borderWidth;
     }
+
+    const graduationStyleObject = graduationStyle && StyleSheet.flatten(graduationStyle);
+    graduationOffset -= graduationStyleObject && graduationStyleObject.width ? graduationStyleObject.width / 2 : GRADUATION_WIDTH / 2;
 
     return graduationOffset;
   },
@@ -448,6 +470,10 @@ var Slider = React.createClass({
     this._handleMeasure('thumbSize', x);
   },
 
+  _measureCurrentValueBubble(x: Object) {
+    this._handleMeasure('currentValueBubbleSize', x);
+  },
+
   _measureLegend(x: Object, index: number) {
     const legendWidth = this.state.legendWidth;
     legendWidth[index] = x.nativeEvent.layout.width;
@@ -465,11 +491,16 @@ var Slider = React.createClass({
     }
     this[storeName] = size;
 
-    if (this._containerSize && this._trackSize && this._thumbSize) {
+    if (this._containerSize
+      && this._trackSize
+      && this._thumbSize
+      && (this.props.currentValueBubble && this._currentValueBubbleSize || !this.props.currentValueBubble)
+    ) {
       this.setState({
         containerSize: this._containerSize,
         trackSize: this._trackSize,
         thumbSize: this._thumbSize,
+        currentValueBubbleSize: this._currentValueBubbleSize,
         allMeasured: true,
       })
     }
@@ -522,11 +553,11 @@ var Slider = React.createClass({
   _setCurrentValueAnimated(value: number) {
     var animationType   = this.props.animationType;
     var animationConfig = Object.assign(
-          {},
-          DEFAULT_ANIMATION_CONFIGS[animationType],
-          this.props.animationConfig,
-          {toValue : value}
-        );
+      {},
+      DEFAULT_ANIMATION_CONFIGS[animationType],
+      this.props.animationConfig,
+      {toValue : value}
+    );
 
     Animated[animationType](this.state.value, animationConfig).start();
   },
@@ -660,7 +691,17 @@ var defaultStyles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: 'green',
     opacity: 0.5,
-  }
+  },
+  currentValueBubbleContainer: {
+    position: 'absolute',
+    backgroundColor: 'blue',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+  },
+  currentValueBubble: {
+    textAlign: 'center',
+  },
 });
 
 module.exports = Slider;
