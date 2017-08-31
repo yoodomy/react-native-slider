@@ -285,6 +285,7 @@ var Slider = React.createClass({
       thumbStyle,
       currentValueBubbleContainerStyle,
       currentValueBubbleTextStyle,
+      ignoredGraduations,
       graduationStyle,
       graduationLabelContainerStyle,
       debugTouchArea,
@@ -325,7 +326,7 @@ var Slider = React.createClass({
           style={[{backgroundColor: maximumTrackTintColor,}, mainStyles.track, trackStyle]}
           onLayout={this._measureTrack} />
         <Animated.View style={[mainStyles.track, trackStyle, minimumTrackStyle]} />
-        {[...Array(numberOfGraduations)].map((x, i) =>
+        {[...Array(numberOfGraduations).keys()].filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
           <View key={i}>
             <View
               style={[
