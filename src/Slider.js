@@ -320,6 +320,10 @@ var Slider = React.createClass({
 
     var numberOfGraduations = graduation ? (maximumValue-minimumValue) / graduation + 1 : 0;
 
+    // ES6 Array.prototype.keys is broken in Android as 08/2017
+    let graduationArray = [];
+    Array(numberOfGraduations).fill(0).forEach((value, index) => graduationArray.push(index));
+
     return (
       <View style={this.props.containerStyle}>
         <View {...other} style={[mainStyles.container, style]} onLayout={this._measureContainer}>
@@ -327,7 +331,7 @@ var Slider = React.createClass({
             style={[{backgroundColor: maximumTrackTintColor,}, mainStyles.track, trackStyle]}
             onLayout={this._measureTrack} />
           <Animated.View style={[mainStyles.track, trackStyle, minimumTrackStyle]} />
-          {[...Array(numberOfGraduations).keys()].filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
+          {graduationArray.filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
             <View key={i}>
               <View
                 style={[
