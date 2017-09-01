@@ -321,33 +321,40 @@ var Slider = React.createClass({
     var numberOfGraduations = graduation ? (maximumValue-minimumValue) / graduation + 1 : 0;
 
     return (
-      <View {...other} style={[mainStyles.container, style]} onLayout={this._measureContainer}>
-        <View
-          style={[{backgroundColor: maximumTrackTintColor,}, mainStyles.track, trackStyle]}
-          onLayout={this._measureTrack} />
-        <Animated.View style={[mainStyles.track, trackStyle, minimumTrackStyle]} />
-        {[...Array(numberOfGraduations).keys()].filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
-          <View key={i}>
-            <View
-              style={[
-                {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
-                mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
-              ]}/>
-            <Animated.View
-              onLayout={(event) => this._measureLegend(event, i)}
-              style={[mainStyles.graduationLabel, graduationLabelContainerStyle,
-                {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
-              {this._renderGraduationLabel(i)}
-            </Animated.View>
+      <View style={this.props.containerStyle}>
+        <View {...other} style={[mainStyles.container, style]} onLayout={this._measureContainer}>
+          <View
+            style={[{backgroundColor: maximumTrackTintColor,}, mainStyles.track, trackStyle]}
+            onLayout={this._measureTrack} />
+          <Animated.View style={[mainStyles.track, trackStyle, minimumTrackStyle]} />
+          {[...Array(numberOfGraduations).keys()].filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
+            <View key={i}>
+              <View
+                style={[
+                  {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
+                  mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
+                ]}/>
+              <Animated.View
+                onLayout={(event) => this._measureLegend(event, i)}
+                style={[mainStyles.graduationLabel, graduationLabelContainerStyle,
+                  {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
+                {this._renderGraduationLabel(i)}
+              </Animated.View>
+            </View>
+          )}
+          <Animated.View
+            onLayout={this._measureThumb}
+            style={[
+              {backgroundColor: thumbTintColor, marginTop: -(trackSize.height + thumbSize.height) / 2},
+              mainStyles.thumb, thumbStyle, {left: thumbLeft, ...valueVisibleStyle}
+            ]}
+          />
+          <View
+            style={[defaultStyles.touchArea, touchOverflowStyle]}
+            {...this._panResponder.panHandlers}>
+            {debugTouchArea === true && this._renderDebugThumbTouchRect(thumbLeft)}
           </View>
-        )}
-        <Animated.View
-          onLayout={this._measureThumb}
-          style={[
-            {backgroundColor: thumbTintColor, marginTop: -(trackSize.height + thumbSize.height) / 2},
-            mainStyles.thumb, thumbStyle, {left: thumbLeft, ...valueVisibleStyle}
-          ]}
-        />
+        </View>
         {!!this.props.currentValueBubble && !!this.props.graduationLabel &&
         <Animated.View
           onLayout={this._measureCurrentValueBubble}
@@ -355,11 +362,6 @@ var Slider = React.createClass({
           <Text style={[mainStyles.currentValueBubble, currentValueBubbleTextStyle]}>{this.props.graduationLabel(this._getCurrentValue())}</Text>
         </Animated.View>
         }
-        <View
-          style={[defaultStyles.touchArea, touchOverflowStyle]}
-          {...this._panResponder.panHandlers}>
-          {debugTouchArea === true && this._renderDebugThumbTouchRect(thumbLeft)}
-        </View>
       </View>
     );
   },
