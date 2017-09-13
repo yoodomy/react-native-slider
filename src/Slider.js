@@ -363,7 +363,7 @@ var Slider = React.createClass({
         <Animated.View
           onLayout={this._measureCurrentValueBubble}
           style={[{top: containerSize.height / 2  - trackSize.height - thumbSize.height - 4}, mainStyles.currentValueBubbleContainer, currentValueBubbleContainerStyle, { left: currentValueBubbleLeft, ...valueVisibleStyle }]}>
-          <Text style={[mainStyles.currentValueBubble, currentValueBubbleTextStyle]}>{this.props.graduationLabel(this._getCurrentValue())}</Text>
+          <Text style={[mainStyles.currentValueBubble, currentValueBubbleTextStyle]}>{this.props.graduationLabel(this.props.value)}</Text>
         </Animated.View>
         }
       </View>
