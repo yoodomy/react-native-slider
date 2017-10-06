@@ -53,8 +53,8 @@ var DEFAULT_ANIMATION_CONFIGS = {
   // }
 };
 
-var Slider = React.createClass({
-  propTypes: {
+class Slider extends React.Component {
+  propTypes = {
     /**
      * Initial value of the slider. The value should be between minimumValue
      * and maximumValue, which default to 0 and 1 respectively.
@@ -194,7 +194,7 @@ var Slider = React.createClass({
      * Used to configure the animation parameters.  These are the same parameters in the Animated library.
      */
     animationConfig : PropTypes.object,
-  },
+  };
   getInitialState() {
     const {
       graduation,
@@ -215,7 +215,7 @@ var Slider = React.createClass({
       allMeasured: false,
       value: new Animated.Value(this.props.value),
     };
-  },
+  };
   getDefaultProps() {
     return {
       value: 0,
@@ -230,7 +230,8 @@ var Slider = React.createClass({
       debugTouchArea: false,
       animationType: 'timing'
     };
-  },
+  }
+
   componentWillMount() {
     this._panResponder = PanResponder.create({
       onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
@@ -242,8 +243,9 @@ var Slider = React.createClass({
       onPanResponderTerminationRequest: this._handlePanResponderRequestEnd,
       onPanResponderTerminate: this._handlePanResponderEnd,
     });
-  },
-  componentWillReceiveProps: function(nextProps) {
+  };
+
+  componentWillReceiveProps = function(nextProps) {
     var newValue = nextProps.value;
     if (this._getCurrentValue() !== newValue) {
       if (this.props.animateTransitions) {
@@ -253,8 +255,9 @@ var Slider = React.createClass({
         this._setCurrentValue(newValue);
       }
     }
-  },
-  shouldComponentUpdate: function(nextProps, nextState) {
+  }
+
+  shouldComponentUpdate = function(nextProps, nextState) {
     // We don't want to re-render in the following cases:
     // - when only the 'value' prop changes as it's already handled with the Animated.Value
     // - when the event handlers change (rendering doesn't depend on them)
@@ -269,7 +272,8 @@ var Slider = React.createClass({
       || !styleEqual(this.props.graduationStyle, nextProps.graduationStyle)
       || !styleEqual(this.props.graduationLabelContainerStyle, nextProps.graduationLabelContainerStyle)
       || !styleEqual(this.props.graduationLabelStyle, nextProps.graduationLabelStyle);
-  },
+  }
+
   render() {
     var {
       graduation,
@@ -367,7 +371,7 @@ var Slider = React.createClass({
         }
       </View>
     );
-  },
+  }
 
   _getPropsForComponentUpdate(props) {
     var {
@@ -386,7 +390,7 @@ var Slider = React.createClass({
     }
 
     return otherProps;
-  },
+  }
 
   _getGraduationOffset(index: number) {
     var {
@@ -413,26 +417,26 @@ var Slider = React.createClass({
     graduationOffset -= graduationStyleObject && graduationStyleObject.width ? graduationStyleObject.width / 2 : GRADUATION_WIDTH / 2;
 
     return graduationOffset;
-  },
+  }
 
-  _handleStartShouldSetPanResponder: function(e: Object, /*gestureState: Object*/): boolean {
+  _handleStartShouldSetPanResponder = function(e: Object, /*gestureState: Object*/): boolean {
     // Should we become active when the user presses down on the thumb?
     this.setState({
       moving: this._thumbHitTest(e),
     });
     return true;
-  },
+  }
 
-  _handleMoveShouldSetPanResponder: function(/*e: Object, gestureState: Object*/): boolean {
+  _handleMoveShouldSetPanResponder = function(/*e: Object, gestureState: Object*/): boolean {
     // Should we become active when the user moves a touch over the thumb?
     return false;
-  },
+  }
 
-  _handlePanResponderGrant: function(e: Object, gestureState: Object) {
+  _handlePanResponderGrant = function(e: Object, gestureState: Object) {
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
     this._fireChangeEvent('onSlidingStart');
-  },
-  _handlePanResponderStart: function(e: Object, gestureState: Object) {
+  }
+  _handlePanResponderStart = function(e: Object, gestureState: Object) {
     if (this._thumbHitTest(e) || !this.props.enableDirectTouch) {
       return;
     }
@@ -440,20 +444,20 @@ var Slider = React.createClass({
     this._setCurrentValue(this._getValue(gestureState, false));
     this._fireChangeEvent('onValueChange');
     this._fireChangeEvent('onSlidingComplete');
-  },
-  _handlePanResponderMove: function(e: Object, gestureState: Object) {
+  }
+  _handlePanResponderMove = function(e: Object, gestureState: Object) {
     if (this.props.disabled || !this.state.moving) {
       return;
     }
 
     this._setCurrentValue(this._getValue(gestureState, true));
     this._fireChangeEvent('onValueChange');
-  },
-  _handlePanResponderRequestEnd: function(e: Object, gestureState: Object) {
+  }
+  _handlePanResponderRequestEnd = function(e: Object, gestureState: Object) {
     // Should we allow another component to take over this pan?
     return false;
-  },
-  _handlePanResponderEnd: function(e: Object, gestureState: Object) {
+  }
+  _handlePanResponderEnd = function(e: Object, gestureState: Object) {
     this.setState({
       moving: false,
     });
@@ -462,29 +466,29 @@ var Slider = React.createClass({
     }
 
     this._fireChangeEvent('onSlidingComplete');
-  },
+  }
 
   _measureContainer(x: Object) {
     this._handleMeasure('containerSize', x);
-  },
+  }
 
   _measureTrack(x: Object) {
     this._handleMeasure('trackSize', x);
-  },
+  }
 
   _measureThumb(x: Object) {
     this._handleMeasure('thumbSize', x);
-  },
+  }
 
   _measureCurrentValueBubble(x: Object) {
     this._handleMeasure('currentValueBubbleSize', x);
-  },
+  }
 
   _measureLegend(x: Object, index: number) {
     const legendWidth = this.state.legendWidth;
     legendWidth[index] = x.nativeEvent.layout.width;
     this.setState({legendWidth});
-  },
+  }
 
   _handleMeasure(name: string, x: Object) {
     var {width, height} = x.nativeEvent.layout;
@@ -510,16 +514,16 @@ var Slider = React.createClass({
         allMeasured: true,
       })
     }
-  },
+  }
 
   _getRatio(value: number) {
     return (value - this.props.minimumValue) / (this.props.maximumValue - this.props.minimumValue);
-  },
+  }
 
   _getThumbLeft(value: number) {
     var ratio = this._getRatio(value);
     return ratio * (this.state.containerSize.width - this.state.thumbSize.width);
-  },
+  }
 
   _getValue(gestureState: Object, move: boolean) {
     var length = this.state.containerSize.width - this.state.thumbSize.width;
@@ -546,15 +550,15 @@ var Slider = React.createClass({
         )
       );
     }
-  },
+  }
 
   _getCurrentValue() {
     return this.state.value.__getValue();
-  },
+  }
 
   _setCurrentValue(value: number) {
     this.state.value.setValue(value);
-  },
+  }
 
   _setCurrentValueAnimated(value: number) {
     var animationType   = this.props.animationType;
@@ -566,13 +570,13 @@ var Slider = React.createClass({
     );
 
     Animated[animationType](this.state.value, animationConfig).start();
-  },
+  }
 
   _fireChangeEvent(event) {
     if (this.props[event]) {
       this.props[event](this._getCurrentValue());
     }
-  },
+  }
 
   _getTouchOverflowSize() {
     var state = this.state;
@@ -585,7 +589,7 @@ var Slider = React.createClass({
     }
 
     return size;
-  },
+  }
 
   _getTouchOverflowStyle() {
     var {width, height} = this._getTouchOverflowSize();
@@ -607,13 +611,13 @@ var Slider = React.createClass({
     }
 
     return touchOverflowStyle;
-  },
+  }
 
   _thumbHitTest(e: Object) {
     var nativeEvent = e.nativeEvent;
     var thumbTouchRect = this._getThumbTouchRect();
     return thumbTouchRect.containsPoint(nativeEvent.locationX, nativeEvent.locationY);
-  },
+  }
 
   _getThumbTouchRect() {
     var state = this.state;
@@ -626,7 +630,7 @@ var Slider = React.createClass({
       props.thumbTouchSize.width,
       props.thumbTouchSize.height
     );
-  },
+  }
 
   _renderGraduationLabel(index: Number) {
     if (this.props.graduationLabel) {
@@ -637,7 +641,7 @@ var Slider = React.createClass({
       )
     }
     return <View />;
-  },
+  }
 
   _renderDebugThumbTouchRect(thumbLeft) {
     var thumbTouchRect = this._getThumbTouchRect();
@@ -655,7 +659,7 @@ var Slider = React.createClass({
       />
     );
   }
-});
+};
 
 
 var defaultStyles = StyleSheet.create({
