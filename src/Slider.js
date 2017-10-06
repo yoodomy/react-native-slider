@@ -195,12 +195,19 @@ class Slider extends React.Component {
      */
     animationConfig : PropTypes.object,
   };
-  getInitialState() {
+
+  constructor(props) {
+    super(props)
+
+    this.state = getInitialState(props);
+  }
+
+  getInitialState(props) {
     const {
       graduation,
       maximumValue,
       minimumValue,
-    } = this.props;
+    } = props;
 
     const numberOfGraduations = graduation ? (maximumValue-minimumValue) / graduation + 1 : 0;
 
