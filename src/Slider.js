@@ -54,7 +54,7 @@ var DEFAULT_ANIMATION_CONFIGS = {
 };
 
 class Slider extends React.Component {
-  propTypes = {
+  static propTypes = {
     /**
      * Initial value of the slider. The value should be between minimumValue
      * and maximumValue, which default to 0 and 1 respectively.
@@ -196,10 +196,24 @@ class Slider extends React.Component {
     animationConfig : PropTypes.object,
   };
 
-  constructor(props) {
-    super(props)
+  static defaultProps = {
+    value: 0,
+    minimumValue: 0,
+    maximumValue: 1,
+    step: 0,
+    graduation: 0,
+    minimumTrackTintColor: '#3f3f3f',
+    maximumTrackTintColor: '#b3b3b3',
+    thumbTintColor: '#343434',
+    thumbTouchSize: {width: 40, height: 40},
+    debugTouchArea: false,
+    animationType: 'timing',
+  };
 
-    this.state = getInitialState(props);
+  constructor(props) {
+    super(props);
+
+    this.state = this.getInitialState(props);
   }
 
   getInitialState(props) {
@@ -223,21 +237,6 @@ class Slider extends React.Component {
       value: new Animated.Value(this.props.value),
     };
   };
-  getDefaultProps() {
-    return {
-      value: 0,
-      minimumValue: 0,
-      maximumValue: 1,
-      step: 0,
-      graduation: 0,
-      minimumTrackTintColor: '#3f3f3f',
-      maximumTrackTintColor: '#b3b3b3',
-      thumbTintColor: '#343434',
-      thumbTouchSize: {width: 40, height: 40},
-      debugTouchArea: false,
-      animationType: 'timing'
-    };
-  }
 
   componentWillMount() {
     this._panResponder = PanResponder.create({
@@ -380,7 +379,7 @@ class Slider extends React.Component {
     );
   }
 
-  _getPropsForComponentUpdate(props) {
+  _getPropsForComponentUpdate = (props) => {
     var {
       onValueChange,
       onSlidingStart,
@@ -397,9 +396,9 @@ class Slider extends React.Component {
     }
 
     return otherProps;
-  }
+  };
 
-  _getGraduationOffset(index: number) {
+  _getGraduationOffset = (index: number) => {
     var {
       graduation,
       graduationStyle,
@@ -424,26 +423,26 @@ class Slider extends React.Component {
     graduationOffset -= graduationStyleObject && graduationStyleObject.width ? graduationStyleObject.width / 2 : GRADUATION_WIDTH / 2;
 
     return graduationOffset;
-  }
+  };
 
-  _handleStartShouldSetPanResponder = function(e: Object, /*gestureState: Object*/): boolean {
+  _handleStartShouldSetPanResponder = (e: Object, /*gestureState: Object*/): boolean => {
     // Should we become active when the user presses down on the thumb?
     this.setState({
       moving: this._thumbHitTest(e),
     });
     return true;
-  }
+  };
 
-  _handleMoveShouldSetPanResponder = function(/*e: Object, gestureState: Object*/): boolean {
+  _handleMoveShouldSetPanResponder = (/*e: Object, gestureState: Object*/): boolean => {
     // Should we become active when the user moves a touch over the thumb?
     return false;
-  }
+  };
 
-  _handlePanResponderGrant = function(e: Object, gestureState: Object) {
+  _handlePanResponderGrant = (e: Object, gestureState: Object) => {
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
     this._fireChangeEvent('onSlidingStart');
-  }
-  _handlePanResponderStart = function(e: Object, gestureState: Object) {
+  };
+  _handlePanResponderStart = (e: Object, gestureState: Object) => {
     if (this._thumbHitTest(e) || !this.props.enableDirectTouch) {
       return;
     }
@@ -451,20 +450,20 @@ class Slider extends React.Component {
     this._setCurrentValue(this._getValue(gestureState, false));
     this._fireChangeEvent('onValueChange');
     this._fireChangeEvent('onSlidingComplete');
-  }
-  _handlePanResponderMove = function(e: Object, gestureState: Object) {
+  };
+  _handlePanResponderMove = (e: Object, gestureState: Object) => {
     if (this.props.disabled || !this.state.moving) {
       return;
     }
 
     this._setCurrentValue(this._getValue(gestureState, true));
     this._fireChangeEvent('onValueChange');
-  }
-  _handlePanResponderRequestEnd = function(e: Object, gestureState: Object) {
+  };
+  _handlePanResponderRequestEnd = (e: Object, gestureState: Object) => {
     // Should we allow another component to take over this pan?
     return false;
-  }
-  _handlePanResponderEnd = function(e: Object, gestureState: Object) {
+  };
+  _handlePanResponderEnd = (e: Object, gestureState: Object) => {
     this.setState({
       moving: false,
     });
@@ -473,31 +472,31 @@ class Slider extends React.Component {
     }
 
     this._fireChangeEvent('onSlidingComplete');
-  }
+  };
 
-  _measureContainer(x: Object) {
+  _measureContainer = (x: Object) => {
     this._handleMeasure('containerSize', x);
-  }
+  };
 
-  _measureTrack(x: Object) {
+  _measureTrack = (x: Object) => {
     this._handleMeasure('trackSize', x);
-  }
+  };
 
-  _measureThumb(x: Object) {
+  _measureThumb = (x: Object) => {
     this._handleMeasure('thumbSize', x);
-  }
+  };
 
-  _measureCurrentValueBubble(x: Object) {
+  _measureCurrentValueBubble = (x: Object) => {
     this._handleMeasure('currentValueBubbleSize', x);
-  }
+  };
 
-  _measureLegend(x: Object, index: number) {
+  _measureLegend = (x: Object, index: number) => {
     const legendWidth = this.state.legendWidth;
     legendWidth[index] = x.nativeEvent.layout.width;
     this.setState({legendWidth});
-  }
+  };
 
-  _handleMeasure(name: string, x: Object) {
+  _handleMeasure = (name: string, x: Object) => {
     var {width, height} = x.nativeEvent.layout;
     var size = {width: width, height: height};
 
@@ -521,18 +520,18 @@ class Slider extends React.Component {
         allMeasured: true,
       })
     }
-  }
+  };
 
-  _getRatio(value: number) {
+  _getRatio = (value: number) => {
     return (value - this.props.minimumValue) / (this.props.maximumValue - this.props.minimumValue);
-  }
+  };
 
-  _getThumbLeft(value: number) {
+  _getThumbLeft = (value: number) => {
     var ratio = this._getRatio(value);
     return ratio * (this.state.containerSize.width - this.state.thumbSize.width);
-  }
+  };
 
-  _getValue(gestureState: Object, move: boolean) {
+  _getValue = (gestureState: Object, move: boolean) => {
     var length = this.state.containerSize.width - this.state.thumbSize.width;
     var thumbLeft;
     if (move) {
@@ -557,17 +556,17 @@ class Slider extends React.Component {
         )
       );
     }
-  }
+  };
 
-  _getCurrentValue() {
+  _getCurrentValue = () => {
     return this.state.value.__getValue();
-  }
+  };
 
-  _setCurrentValue(value: number) {
+  _setCurrentValue = (value: number) => {
     this.state.value.setValue(value);
-  }
+  };
 
-  _setCurrentValueAnimated(value: number) {
+  _setCurrentValueAnimated = (value: number) => {
     var animationType   = this.props.animationType;
     var animationConfig = Object.assign(
       {},
@@ -577,15 +576,15 @@ class Slider extends React.Component {
     );
 
     Animated[animationType](this.state.value, animationConfig).start();
-  }
+  };
 
-  _fireChangeEvent(event) {
+  _fireChangeEvent = (event) => {
     if (this.props[event]) {
       this.props[event](this._getCurrentValue());
     }
-  }
+  };
 
-  _getTouchOverflowSize() {
+  _getTouchOverflowSize = () => {
     var state = this.state;
     var props = this.props;
 
@@ -596,9 +595,9 @@ class Slider extends React.Component {
     }
 
     return size;
-  }
+  };
 
-  _getTouchOverflowStyle() {
+  _getTouchOverflowStyle = () => {
     var {width, height} = this._getTouchOverflowSize();
 
     var touchOverflowStyle = {};
@@ -618,15 +617,15 @@ class Slider extends React.Component {
     }
 
     return touchOverflowStyle;
-  }
+  };
 
-  _thumbHitTest(e: Object) {
+  _thumbHitTest = (e: Object) => {
     var nativeEvent = e.nativeEvent;
     var thumbTouchRect = this._getThumbTouchRect();
     return thumbTouchRect.containsPoint(nativeEvent.locationX, nativeEvent.locationY);
-  }
+  };
 
-  _getThumbTouchRect() {
+  _getThumbTouchRect = () => {
     var state = this.state;
     var props = this.props;
     var touchOverflowSize = this._getTouchOverflowSize();
@@ -637,9 +636,9 @@ class Slider extends React.Component {
       props.thumbTouchSize.width,
       props.thumbTouchSize.height
     );
-  }
+  };
 
-  _renderGraduationLabel(index: Number) {
+  _renderGraduationLabel = (index: Number) => {
     if (this.props.graduationLabel) {
       return (
         <Text style={[{textAlign: 'center'}, this.props.graduationLabelStyle]}>
@@ -648,9 +647,9 @@ class Slider extends React.Component {
       )
     }
     return <View />;
-  }
+  };
 
-  _renderDebugThumbTouchRect(thumbLeft) {
+  _renderDebugThumbTouchRect = (thumbLeft) => {
     var thumbTouchRect = this._getThumbTouchRect();
     var positionStyle = {
       left: thumbLeft,
@@ -665,8 +664,8 @@ class Slider extends React.Component {
         pointerEvents='none'
       />
     );
-  }
-};
+  };
+}
 
 
 var defaultStyles = StyleSheet.create({
