@@ -11,7 +11,8 @@ import {
   PanResponder,
   Text,
   View,
-  Easing
+  Easing,
+  ViewPropTypes,
 } from "react-native";
 
 const shallowCompare = require('react-addons-shallow-compare'),
@@ -156,24 +157,24 @@ class Slider extends React.Component {
     /**
      * The style applied to the slider container.
      */
-    style: View.propTypes.style,
+    style: ViewPropTypes.style,
 
     /**
      * The style applied to the track.
      */
-    trackStyle: View.propTypes.style,
+    trackStyle: ViewPropTypes.style,
 
     /**
      * The style applied to the thumb.
      */
-    thumbStyle: View.propTypes.style,
+    thumbStyle: ViewPropTypes.style,
 
     /**
      * The style applied to the graduation.
      */
-    graduationStyle: View.propTypes.style,
+    graduationStyle: ViewPropTypes.style,
     graduationLabelStyle: Text.propTypes.style,
-    graduationLabelContainerStyle: View.propTypes.style,
+    graduationLabelContainerStyle: ViewPropTypes.style,
 
     /**
      * Set this to true to visually see the thumb touch rect in green.
