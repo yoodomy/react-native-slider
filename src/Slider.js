@@ -73,14 +73,6 @@ class Slider extends React.Component {
     disabled: PropTypes.bool,
 
     /**
-     * If true, touching the slider will directly move the thumb to the
-     * touched position
-     * WARNING : Only works if the slider is centered on the screen
-     * Default value is false
-     */
-    enableDirectTouch: PropTypes.bool,
-
-    /**
      * Initial minimum value of the slider. Default value is 0.
      */
     minimumValue: PropTypes.number,
@@ -246,9 +238,9 @@ class Slider extends React.Component {
       onPanResponderGrant: this._handlePanResponderGrant,
       onPanResponderStart: this._handlePanResponderStart,
       onPanResponderMove: this._handlePanResponderMove,
-      onPanResponderRelease: this._handlePanResponderEnd,
+      onPanResponderRelease: this._handlePanResponderRelease,
       onPanResponderTerminationRequest: this._handlePanResponderRequestEnd,
-      onPanResponderTerminate: this._handlePanResponderEnd,
+      onPanResponderTerminate: this._handlePanResponderTerminate,
     });
   };
 
@@ -443,17 +435,11 @@ class Slider extends React.Component {
     this._previousLeft = this._getThumbLeft(this._getCurrentValue());
     this._fireChangeEvent('onSlidingStart');
   };
-  _handlePanResponderStart = (e: Object, gestureState: Object) => {
-    if (this._thumbHitTest(e) || !this.props.enableDirectTouch) {
-      return;
-    }
-
-    this._setCurrentValue(this._getValue(gestureState, false));
-    this._fireChangeEvent('onValueChange');
-    this._fireChangeEvent('onSlidingComplete');
-  };
+  _handlePanResponderStart = (e: Object, gestureState: Object) => {};
   _handlePanResponderMove = (e: Object, gestureState: Object) => {
-    if (this.props.disabled || !this.state.moving) {
+    if (this.props.disabled
+      || !this.state.moving
+      || Math.abs(gestureState.dy) > this.state.containerSize.height) {
       return;
     }
 
@@ -462,9 +448,9 @@ class Slider extends React.Component {
   };
   _handlePanResponderRequestEnd = (e: Object, gestureState: Object) => {
     // Should we allow another component to take over this pan?
-    return false;
+    return Math.abs(gestureState.dy) > this.state.containerSize.height;
   };
-  _handlePanResponderEnd = (e: Object, gestureState: Object) => {
+  _handlePanResponderRelease = (e: Object, gestureState: Object) => {
     this.setState({
       moving: false,
     });
@@ -472,7 +458,19 @@ class Slider extends React.Component {
       return;
     }
 
+    if (!this._thumbHitTest(e)
+      && Math.abs(gestureState.dx) < this.state.thumbSize.width
+      && Math.abs(gestureState.dy) < this.state.thumbSize.height) {
+      this._setCurrentValue(this._getValue(gestureState, false));
+      this._fireChangeEvent('onValueChange');
+    }
+
     this._fireChangeEvent('onSlidingComplete');
+  };
+  _handlePanResponderTerminate = (e: Object, gestureState: Object) => {
+    this.setState({
+      moving: false,
+    });
   };
 
   _measureContainer = (x: Object) => {
