@@ -333,21 +333,7 @@ class Slider extends React.Component {
             style={[{backgroundColor: maximumTrackTintColor,}, mainStyles.track, trackStyle]}
             onLayout={this._measureTrack} />
           <Animated.View style={[mainStyles.track, trackStyle, minimumTrackStyle]} />
-          {graduationArray.filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
-            <View key={i}>
-              <View
-                style={[
-                  {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
-                  mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
-                ]}/>
-              <Animated.View
-                onLayout={(event) => this._measureLegend(event, i)}
-                style={[mainStyles.graduationLabel, graduationLabelContainerStyle,
-                  {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
-                {this._renderGraduationLabel(i)}
-              </Animated.View>
-            </View>
-          )}
+
           <Animated.View
             onLayout={this._measureThumb}
             style={[
@@ -361,6 +347,21 @@ class Slider extends React.Component {
             {debugTouchArea === true && this._renderDebugThumbTouchRect(thumbLeft)}
           </View>
         </View>
+        {graduationArray.filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
+            <View key={i} style={{top: containerSize.height / 2 + trackSize.height / 2, position:'absolute'}}>
+              <View
+                style={[
+                  {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
+                  mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
+                ]}/>
+              <Animated.View
+                onLayout={(event) => this._measureLegend(event, i)}
+                style={[mainStyles.graduationLabel, graduationLabelContainerStyle,
+                  {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
+                {this._renderGraduationLabel(i)}
+              </Animated.View>
+            </View>
+          )}
         {!!this.props.currentValueBubble && !!this.props.graduationLabel &&
         <Animated.View
           onLayout={this._measureCurrentValueBubble}
