@@ -288,6 +288,7 @@ class Slider extends React.Component {
       currentValueBubbleContainerStyle,
       currentValueBubbleTextStyle,
       ignoredGraduations,
+      showBarAtIgnoredGraduation,
       graduationStyle,
       graduationLabelContainerStyle,
       debugTouchArea,
@@ -347,8 +348,9 @@ class Slider extends React.Component {
             {debugTouchArea === true && this._renderDebugThumbTouchRect(thumbLeft)}
           </View>
         </View>
-        {graduationArray.filter(i => !ignoredGraduations || !ignoredGraduations.includes(i+1)).map(i =>
-            <View key={i} style={{top: containerSize.height / 2 + trackSize.height / 2, position:'absolute'}}>
+        {graduationArray.map(i =>
+          (!ignoredGraduations || !ignoredGraduations.includes(i+1)) ?
+            (<View key={i} style={{top: containerSize.height / 2 + trackSize.height / 2, position:'absolute'}}>
               <View
                 style={[
                   {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
@@ -360,7 +362,11 @@ class Slider extends React.Component {
                   {width: this.state.legendWidth[i], left: this._getGraduationOffset(i)-this.state.legendWidth[i]/2}]}>
                 {this._renderGraduationLabel(i)}
               </Animated.View>
-            </View>
+            </View>) : (showBarAtIgnoredGraduation &&
+              <View key={i} style={{top: containerSize.height / 2 + trackSize.height / 2, position:'absolute'}}>
+                <View style={{backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT - 2) / 2, width: 2, height: GRADUATION_HEIGHT - 2, left: this._getGraduationOffset(i), ...valueVisibleStyle}}/>
+              </View>
+            )
           )}
         {!!this.props.currentValueBubble && !!this.props.graduationLabel &&
         <Animated.View
