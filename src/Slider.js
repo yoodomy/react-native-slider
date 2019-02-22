@@ -301,9 +301,14 @@ class Slider extends React.Component {
       outputRange: [0, containerSize.width - thumbSize.width],
       //extrapolate: 'clamp',
     });
+
+    const currentValueBubbleOverflow = currentValueBubbleSize.width / 2 - thumbSize.width / 2;
+    const outputRangeMin = -currentValueBubbleOverflow;
+    const outputRangeMax = containerSize.width - (currentValueBubbleSize.width - currentValueBubbleOverflow);
+
     const currentValueBubbleLeft = !!this.props.currentValueBubble && value.interpolate({
       inputRange: [minimumValue, maximumValue],
-      outputRange: [-thumbSize.width / 2 + 4, containerSize.width - currentValueBubbleSize.width + thumbSize.width / 2 - 4],
+      outputRange: [outputRangeMin, outputRangeMax],
     });
 
     var valueVisibleStyle = {};
