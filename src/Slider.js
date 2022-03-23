@@ -13,6 +13,7 @@ import {
   View,
   Easing,
   ViewPropTypes,
+  Platform,
 } from "react-native";
 
 const shallowCompare = require('react-addons-shallow-compare'),
@@ -328,6 +329,8 @@ class Slider extends React.Component {
 
     var numberOfGraduations = graduation ? (maximumValue-minimumValue) / graduation + 1 : 0;
 
+    var active = this.state.value.__getValue();
+
     // ES6 Array.prototype.keys is broken in Android as 08/2017
     let graduationArray = [];
     Array(numberOfGraduations).fill(0).forEach((value, index) => graduationArray.push(index));
@@ -359,7 +362,7 @@ class Slider extends React.Component {
               <View
                 style={[
                   {backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2},
-                  mainStyles.graduation, graduationStyle, {left: this._getGraduationOffset(i), ...valueVisibleStyle}
+                  mainStyles.graduation, graduationStyle, Math.round(active) === i && {backgroundColor:'transparent'},{left: this._getGraduationOffset(i), ...valueVisibleStyle}
                 ]}/>
               <Animated.View
                 onLayout={(event) => this._measureLegend(event, i)}
@@ -431,11 +434,12 @@ class Slider extends React.Component {
   };
 
   _handleStartShouldSetPanResponder = (e: Object, /*gestureState: Object*/): boolean => {
+    // Until the PR https://github.com/facebook/react-native/pull/3426 is merged, we need to always return "true" for android
+    if (Platform.OS === 'android') {
+      return true;
+    }
     // Should we become active when the user presses down on the thumb?
-    this.setState({
-      moving: this._thumbHitTest(e),
-    });
-    return true;
+    return this._thumbHitTest(e);
   };
 
   _handleMoveShouldSetPanResponder = (/*e: Object, gestureState: Object*/): boolean => {
