@@ -225,7 +225,7 @@ class Slider extends React.Component {
       containerSize: {width: 0, height: 0},
       trackSize: {width: 0, height: 0},
       thumbSize: {width: 0, height: 0},
-      currentValueBubbleSize: {width: 0, height: 0},
+      currentValueBubbleSize: {width: 5, height: 5},
       legendWidth: Array.from(new Array(numberOfGraduations), () => 150),
       allMeasured: false,
       value: new Animated.Value(this.props.value),
@@ -372,7 +372,7 @@ class Slider extends React.Component {
               </Animated.View>
             </View>) : (showBarAtIgnoredGraduation &&
               <View key={i} style={{top: containerSize.height / 2 + trackSize.height / 2, position:'absolute'}}>
-                <View style={{backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT - 2) / 2, width: 2, height: GRADUATION_HEIGHT - 2, left: this._getGraduationOffset(i), ...valueVisibleStyle}}/>
+                <View style={{backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2, width: 2, height: GRADUATION_HEIGHT - 2, left: this._getGraduationOffset(i), ...valueVisibleStyle}}/>
               </View>
             )
           )}
