@@ -303,7 +303,7 @@ class Slider extends React.Component {
       //extrapolate: 'clamp',
     });
 
-    const currentValueBubbleOverflow = currentValueBubbleSize.width / 2 - thumbSize.width / 2;
+    const currentValueBubbleOverflow = currentValueBubbleSize && currentValueBubbleSize.width ? currentValueBubbleSize.width / 2 - thumbSize.width / 2 : 5;
     const outputRangeMin = -currentValueBubbleOverflow;
     const outputRangeMax = containerSize.width - (currentValueBubbleSize.width - currentValueBubbleOverflow);
 
@@ -372,7 +372,7 @@ class Slider extends React.Component {
               </Animated.View>
             </View>) : (showBarAtIgnoredGraduation &&
               <View key={i} style={{top: containerSize.height / 2 + trackSize.height / 2, position:'absolute'}}>
-                <View style={{backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2, width: 2, height: GRADUATION_HEIGHT - 2, left: this._getGraduationOffset(i), ...valueVisibleStyle}}/>
+                <View style={{backgroundColor: maximumTrackTintColor, marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2, left: this._getGraduationOffset(i), ...valueVisibleStyle}}/>
               </View>
             )
           )}
@@ -434,12 +434,10 @@ class Slider extends React.Component {
   };
 
   _handleStartShouldSetPanResponder = (e: Object, /*gestureState: Object*/): boolean => {
-    // Until the PR https://github.com/facebook/react-native/pull/3426 is merged, we need to always return "true" for android
-    if (Platform.OS === 'android') {
-      return true;
-    }
-    // Should we become active when the user presses down on the thumb?
-    return this._thumbHitTest(e);
+    this.setState({
+      moving: this._thumbHitTest(e),
+    });
+    return true;
   };
 
   _handleMoveShouldSetPanResponder = (/*e: Object, gestureState: Object*/): boolean => {
