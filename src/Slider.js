@@ -414,8 +414,8 @@ class Slider extends React.Component<Props> {
                     marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2,
                   },
                   mainStyles.graduation,
-                  graduationStyle, Math.round(active) === i && {backgroundColor:'transparent'},
-                  graduationStyle,
+                  graduationStyle, 
+                  Math.round(active) === i && {backgroundColor:'transparent'},
                   { left: this._getGraduationOffset(i), ...valueVisibleStyle },
                 ]}
               />
@@ -451,8 +451,8 @@ class Slider extends React.Component<Props> {
                       marginTop: -(trackSize.height + GRADUATION_HEIGHT) / 2,
                     },
                     mainStyles.graduation,
-                    graduationStyle, Math.round(active) === i && {backgroundColor:'transparent'},
                     graduationStyle,
+                    Math.round(active) === i && {backgroundColor:'transparent'},
                     { left: this._getGraduationOffset(i), ...valueVisibleStyle },
                   ]}
                 />
